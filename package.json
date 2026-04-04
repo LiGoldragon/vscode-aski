@@ -60,7 +60,7 @@
     "esbuild": "^0.21.0"
   },
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "build": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --external:web-tree-sitter --format=cjs --platform=node",
     "package": "npx @vscode/vsce package"
   }
 }

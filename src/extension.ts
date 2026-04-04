@@ -84,7 +84,12 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
   constructor(private extensionPath: string) {}
 
   async init(): Promise<void> {
-    await Parser.init();
+    const treeSitterWasm = path.join(
+      this.extensionPath, 'node_modules', 'web-tree-sitter', 'tree-sitter.wasm'
+    );
+    await Parser.init({
+      locateFile: () => treeSitterWasm,
+    });
     this.parser = new Parser();
 
     const wasmPath = path.join(this.extensionPath, 'grammars', 'tree-sitter-aski.wasm');
