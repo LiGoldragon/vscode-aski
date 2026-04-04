@@ -20,4 +20,3 @@ result
 # Node
 node_modules/
 out/
-*.vsix
