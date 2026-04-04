@@ -2,7 +2,7 @@
   "name": "vscode-aski",
   "displayName": "Aski Language",
   "description": "Tree-sitter syntax highlighting for the Aski language",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "criome",
   "license": "MIT",
   "engines": {
@@ -19,67 +19,28 @@
     "languages": [
       {
         "id": "aski",
-        "aliases": [
-          "Aski"
-        ],
-        "extensions": [
-          ".aski"
-        ],
+        "aliases": ["Aski"],
+        "extensions": [".aski"],
         "configuration": "./language-configuration.json"
       }
     ],
-    "semanticTokenScopes": [
-      {
-        "language": "aski",
-        "scopes": {
-          "keyword": [
-            "keyword.control.aski"
-          ],
-          "function": [
-            "entity.name.function.aski"
-          ],
-          "method": [
-            "entity.name.function.method.aski"
-          ],
-          "string": [
-            "string.quoted.aski"
-          ],
-          "comment": [
-            "comment.line.aski"
-          ],
-          "type": [
-            "entity.name.type.aski"
-          ],
-          "interface": [
-            "entity.name.type.interface.aski"
-          ],
-          "variable": [
-            "variable.other.aski"
-          ],
-          "parameter": [
-            "variable.parameter.aski"
-          ],
-          "property": [
-            "variable.other.property.aski"
-          ],
-          "number": [
-            "constant.numeric.aski"
-          ],
-          "operator": [
-            "keyword.operator.aski"
-          ],
-          "label": [
-            "entity.name.label.aski"
-          ],
-          "decorator": [
-            "punctuation.special.aski"
-          ],
-          "regexp": [
-            "constant.other.aski"
-          ]
+    "configurationDefaults": {
+      "editor.semanticTokenColorCustomizations": {
+        "rules": {
+          "comment:aski":   "#505050",
+          "keyword:aski":   "#bb44ee",
+          "string:aski":    "#00cc44",
+          "number:aski":    "#ff8800",
+          "operator:aski":  "#ff5577",
+          "type:aski":      "#f5c000",
+          "function:aski":  "#e040a0",
+          "variable:aski":  "#d0d0d0",
+          "parameter:aski": "#ff0066",
+          "macro:aski":     "#cc44ff",
+          "regexp:aski":    "#b0b0b0"
         }
       }
-    ]
+    }
   },
   "dependencies": {
     "web-tree-sitter": "^0.26.8"

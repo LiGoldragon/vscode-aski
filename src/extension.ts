@@ -1,75 +1,97 @@
+import { Parser, Language, Query } from 'web-tree-sitter';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Parser, Language, Query } from 'web-tree-sitter';
 
+// Token types — expanded to match Emacs face granularity
 const TOKEN_TYPES = [
-  'comment', 'keyword', 'string', 'number', 'operator',
-  'type', 'interface', 'function', 'method', 'variable',
-  'parameter', 'property', 'label', 'decorator', 'regexp',
-  'enumMember',
+  'comment',     // 0  base03 — comments
+  'keyword',     // 1  base0E — control flow, sigils @ : ~ ! ?
+  'string',      // 2  base0B — string literals
+  'number',      // 3  base09 — numbers, constants, variants
+  'operator',    // 4  base0F — binary operators
+  'type',        // 5  base0A — types, domains, modules, grammar
+  'function',    // 6  base0D — functions, methods, traits
+  'variable',    // 7  base05 — variable use (instance_ref)
+  'parameter',   // 8  base08 — parameter defs, variable defs, struct names, properties
+  'macro',       // 9  base0C — builtins (Main, StdOut, self), escapes
+  'regexp',      // 10 base04 — punctuation, brackets
 ];
 
-const TOKEN_MODIFIERS = ['definition', 'builtin'];
+const TOKEN_MODIFIERS: string[] = [];
 
 const legend = new vscode.SemanticTokensLegend(TOKEN_TYPES, TOKEN_MODIFIERS);
 
-// Map tree-sitter @capture names to [tokenType, ...modifiers]
-const CAPTURE_MAP: Record<string, [string, ...string[]]> = {
-  'comment':              ['comment'],
-  'keyword':              ['keyword'],
-  'keyword.control':      ['keyword'],
-  'keyword.return':       ['keyword'],
-  'keyword.yield':        ['keyword'],
-  'string':               ['string'],
-  'string.escape':        ['regexp'],
-  'string.special':       ['regexp'],
-  'number':               ['number'],
-  'number.float':         ['number'],
-  'operator':             ['operator'],
-  'operator.comparison':  ['operator'],
-  'operator.logical':     ['operator'],
-  'type':                 ['type'],
-  'type.builtin':         ['type', 'builtin'],
-  'type.definition':      ['type', 'definition'],
-  'type.interface':       ['interface'],
-  'function':             ['function'],
-  'function.builtin':     ['function', 'builtin'],
-  'function.method':      ['method'],
-  'function.method.call': ['method'],
-  'variable':             ['variable'],
-  'variable.builtin':     ['variable', 'builtin'],
-  'variable.parameter':   ['parameter'],
-  'property':             ['property'],
-  'constructor':          ['enumMember'],
-  'constant':             ['number'],
-  'constant.builtin':     ['number', 'builtin'],
-  'label':                ['label'],
-  'module':               ['type'],
-  'error':                ['regexp'],
-  'punctuation.special':  ['decorator'],
-  'punctuation.bracket':  ['operator'],
-  'punctuation.delimiter': ['operator'],
+// Map tree-sitter captures → Emacs-equivalent token types
+const CAPTURE_MAP: Record<string, number> = {
+  // comment → base03
+  'comment':              0,
+
+  // keyword → base0E (control flow + sigils)
+  'keyword':              1,
+  'keyword.control':      1,
+  'keyword.return':       1,
+  'keyword.yield':        1,
+
+  // string → base0B
+  'string':               2,
+
+  // number/constant → base09
+  'number':               3,
+  'number.float':         3,
+  'constant':             3,
+  'constant.builtin':     3,
+  'constructor':          3,  // variants are constants in aski
+
+  // operator → base0F
+  'operator':             4,
+  'operator.comparison':  4,
+  'operator.logical':     4,
+
+  // type → base0A (type, domain, module, grammar, preprocessor)
+  'type':                 5,
+  'type.builtin':         5,
+  'type.definition':      5,
+  'type.interface':       5,
+  'module':               5,
+
+  // function → base0D (function, method, trait)
+  'function':             6,
+  'function.builtin':     9,  // Main/StdOut → builtin (base0C)
+  'function.method':      6,
+  'function.method.call': 6,
+
+  // variable → base05 (instance_ref use)
+  'variable':             7,
+
+  // parameter → base08 (definitions, struct names, properties)
+  'variable.parameter':   8,
+  'variable.builtin':     9,  // self, wildcard → builtin
+  'property':             8,
+
+  // builtin → base0C (Main, StdOut, escapes)
+  'string.escape':        9,
+  'string.special':       9,
+
+  // punctuation → base04
+  'punctuation.special':  1,  // sigils @ : ~ ! → keyword (base0E)
+  'punctuation.bracket':  10,
+  'punctuation.delimiter': 10,
+
+  // error/stub → base08
+  'error':                8,
+
+  // label → base0A
+  'label':                5,
 };
 
-function resolveCapture(name: string): [number, number] | null {
+function resolveCapture(name: string): number | null {
   const clean = name.startsWith('@') ? name.slice(1) : name;
 
-  // Try exact match first, then progressively shorter prefixes
   let key = clean;
   while (key) {
-    const entry = CAPTURE_MAP[key];
-    if (entry) {
-      const [typeName, ...mods] = entry;
-      const typeIdx = TOKEN_TYPES.indexOf(typeName);
-      if (typeIdx < 0) return null;
-      let modBits = 0;
-      for (const m of mods) {
-        const mi = TOKEN_MODIFIERS.indexOf(m);
-        if (mi >= 0) modBits |= 1 << mi;
-      }
-      return [typeIdx, modBits];
-    }
+    const idx = CAPTURE_MAP[key];
+    if (idx !== undefined) return idx;
     const dot = key.lastIndexOf('.');
     if (dot < 0) break;
     key = key.slice(0, dot);
@@ -107,7 +129,7 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
 
     let querySource = fs.readFileSync(queryPath, 'utf-8');
 
-    // Retry query loading, removing lines with bad node types
+    // Remove lines with node types not in this grammar version
     let attempts = 0;
     while (attempts < 20) {
       try {
@@ -142,10 +164,9 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
 
     for (const match of matches) {
       for (const capture of match.captures) {
-        const resolved = resolveCapture(capture.name);
-        if (!resolved) continue;
+        const typeIdx = resolveCapture(capture.name);
+        if (typeIdx === null) continue;
 
-        const [typeIdx, modBits] = resolved;
         const node = capture.node;
         const startLine = node.startPosition.row;
         const startChar = node.startPosition.column;
@@ -153,15 +174,15 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
         const endChar = node.endPosition.column;
 
         if (startLine === endLine) {
-          builder.push(startLine, startChar, endChar - startChar, typeIdx, modBits);
+          builder.push(startLine, startChar, endChar - startChar, typeIdx, 0);
         } else {
           const firstLen = document.lineAt(startLine).text.length - startChar;
-          builder.push(startLine, startChar, firstLen, typeIdx, modBits);
+          builder.push(startLine, startChar, firstLen, typeIdx, 0);
           for (let line = startLine + 1; line < endLine; line++) {
-            builder.push(line, 0, document.lineAt(line).text.length, typeIdx, modBits);
+            builder.push(line, 0, document.lineAt(line).text.length, typeIdx, 0);
           }
           if (endChar > 0) {
-            builder.push(endLine, 0, endChar, typeIdx, modBits);
+            builder.push(endLine, 0, endChar, typeIdx, 0);
           }
         }
       }
