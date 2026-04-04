@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import Parser from 'web-tree-sitter';
+import { Parser, Language, Query } from 'web-tree-sitter';
 
 const TOKEN_TYPES = [
   'comment', 'keyword', 'string', 'number', 'operator',
@@ -79,18 +79,15 @@ function resolveCapture(name: string): [number, number] | null {
 
 class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
   private parser: Parser | null = null;
-  private query: Parser.Query | null = null;
+  private query: Query | null = null;
 
   constructor(private extensionPath: string) {}
 
   async init(): Promise<void> {
-    const treeSitterWasm = path.join(
-      this.extensionPath, 'node_modules', 'web-tree-sitter', 'tree-sitter.wasm'
-    );
     await Parser.init({
-      locateFile: () => treeSitterWasm,
+      locateFile: (_file: string) =>
+        path.join(this.extensionPath, 'node_modules', 'web-tree-sitter', _file),
     });
-    this.parser = new Parser();
 
     const wasmPath = path.join(this.extensionPath, 'grammars', 'tree-sitter-aski.wasm');
     if (!fs.existsSync(wasmPath)) {
@@ -98,7 +95,8 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
       return;
     }
 
-    const language = await Parser.Language.load(wasmPath);
+    const language = await Language.load(wasmPath);
+    this.parser = new Parser();
     this.parser.setLanguage(language);
 
     const queryPath = path.join(this.extensionPath, 'queries', 'highlights.scm');
@@ -107,8 +105,29 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
       return;
     }
 
-    const querySource = fs.readFileSync(queryPath, 'utf-8');
-    this.query = language.query(querySource);
+    let querySource = fs.readFileSync(queryPath, 'utf-8');
+
+    // Retry query loading, removing lines with bad node types
+    let attempts = 0;
+    while (attempts < 20) {
+      try {
+        this.query = new Query(language, querySource);
+        break;
+      } catch (e: any) {
+        if (e.index !== undefined) {
+          const before = querySource.substring(0, e.index);
+          const lineStart = before.lastIndexOf('\n') + 1;
+          const lineEnd = querySource.indexOf('\n', e.index);
+          querySource = querySource.substring(0, lineStart) +
+            ';; skipped\n' +
+            (lineEnd > 0 ? querySource.substring(lineEnd + 1) : '');
+          attempts++;
+        } else {
+          vscode.window.showErrorMessage(`Aski: query error: ${e.message}`);
+          return;
+        }
+      }
+    }
   }
 
   provideDocumentSemanticTokens(

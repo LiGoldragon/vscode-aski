@@ -32,32 +32,62 @@
       {
         "language": "aski",
         "scopes": {
-          "keyword": ["keyword.control.aski"],
-          "function": ["entity.name.function.aski"],
-          "method": ["entity.name.function.method.aski"],
-          "string": ["string.quoted.aski"],
-          "comment": ["comment.line.aski"],
-          "type": ["entity.name.type.aski"],
-          "interface": ["entity.name.type.interface.aski"],
-          "variable": ["variable.other.aski"],
-          "parameter": ["variable.parameter.aski"],
-          "property": ["variable.other.property.aski"],
-          "number": ["constant.numeric.aski"],
-          "operator": ["keyword.operator.aski"],
-          "label": ["entity.name.label.aski"],
-          "decorator": ["punctuation.special.aski"],
-          "regexp": ["constant.other.aski"]
+          "keyword": [
+            "keyword.control.aski"
+          ],
+          "function": [
+            "entity.name.function.aski"
+          ],
+          "method": [
+            "entity.name.function.method.aski"
+          ],
+          "string": [
+            "string.quoted.aski"
+          ],
+          "comment": [
+            "comment.line.aski"
+          ],
+          "type": [
+            "entity.name.type.aski"
+          ],
+          "interface": [
+            "entity.name.type.interface.aski"
+          ],
+          "variable": [
+            "variable.other.aski"
+          ],
+          "parameter": [
+            "variable.parameter.aski"
+          ],
+          "property": [
+            "variable.other.property.aski"
+          ],
+          "number": [
+            "constant.numeric.aski"
+          ],
+          "operator": [
+            "keyword.operator.aski"
+          ],
+          "label": [
+            "entity.name.label.aski"
+          ],
+          "decorator": [
+            "punctuation.special.aski"
+          ],
+          "regexp": [
+            "constant.other.aski"
+          ]
         }
       }
     ]
   },
   "dependencies": {
-    "web-tree-sitter": "^0.24.0"
+    "web-tree-sitter": "^0.26.8"
   },
   "devDependencies": {
     "@types/vscode": "^1.80.0",
-    "typescript": "^5.0.0",
-    "esbuild": "^0.21.0"
+    "esbuild": "^0.21.0",
+    "typescript": "^5.0.0"
   },
   "scripts": {
     "build": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --external:web-tree-sitter --format=cjs --platform=node",
