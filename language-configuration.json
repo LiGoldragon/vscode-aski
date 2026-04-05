@@ -25,11 +25,9 @@
     { "open": "(", "close": ")" },
     { "open": "\"", "close": "\"" }
   ],
-  "folding": {
-    "markers": {
-      "start": "^\\s*[\\[\\(\\{]",
-      "end": "^\\s*[\\]\\)\\}]"
-    }
+  "indentationRules": {
+    "increaseIndentPattern": "[\\(\\[\\{]\\s*$",
+    "decreaseIndentPattern": "^\\s*[\\)\\]\\}]"
   },
   "wordPattern": "(@?[A-Za-z][a-zA-Z0-9_]*)|([~:!^#])|([+\\-*/%<>=&|?.]+)"
 }
