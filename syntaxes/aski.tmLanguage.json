@@ -1,0 +1,313 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Aski",
+  "scopeName": "source.aski",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#number" },
+    { "include": "#constant" },
+    { "include": "#builtin-function" },
+    { "include": "#builtin-type" },
+    { "include": "#boolean" },
+    { "include": "#pub" },
+    { "include": "#grammar-rule-ref" },
+    { "include": "#ffi-block" },
+    { "include": "#self-ref" },
+    { "include": "#mutable-borrow-ref" },
+    { "include": "#borrow-ref" },
+    { "include": "#instance-ref" },
+    { "include": "#const-ref" },
+    { "include": "#return-yield" },
+    { "include": "#match-delimiters" },
+    { "include": "#tail-delimiters" },
+    { "include": "#bound-delimiters" },
+    { "include": "#stub" },
+    { "include": "#wildcard" },
+    { "include": "#operator" },
+    { "include": "#label" },
+    { "include": "#type-identifier" },
+    { "include": "#identifier" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comment": {
+      "match": ";;.*$",
+      "name": "comment.line.semicolon.aski"
+    },
+
+    "string": {
+      "name": "string.quoted.double.aski",
+      "begin": "\"",
+      "end": "\"",
+      "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.aski" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.string.end.aski" } },
+      "patterns": [
+        {
+          "match": "\\\\[nrt\\\\\"0]",
+          "name": "constant.character.escape.aski"
+        },
+        {
+          "match": "\\$[A-Z][a-zA-Z0-9_]*",
+          "name": "variable.other.interpolation.aski"
+        },
+        {
+          "name": "meta.interpolation.aski",
+          "begin": "\\$\\(",
+          "end": "\\)",
+          "beginCaptures": { "0": { "name": "punctuation.definition.interpolation.begin.aski" } },
+          "endCaptures": { "0": { "name": "punctuation.definition.interpolation.end.aski" } },
+          "contentName": "source.aski.embedded",
+          "patterns": [{ "include": "source.aski" }]
+        },
+        {
+          "name": "meta.inline-eval.string.aski",
+          "begin": "\\[",
+          "end": "\\]",
+          "beginCaptures": { "0": { "name": "constant.character.escape.aski" } },
+          "endCaptures": { "0": { "name": "constant.character.escape.aski" } },
+          "contentName": "source.aski.embedded",
+          "patterns": [{ "include": "source.aski" }]
+        }
+      ]
+    },
+
+    "number": {
+      "patterns": [
+        {
+          "match": "\\b[0-9]+\\.[0-9]+\\b",
+          "name": "constant.numeric.float.aski"
+        },
+        {
+          "match": "\\b[0-9]+\\b",
+          "name": "constant.numeric.integer.aski"
+        }
+      ]
+    },
+
+    "boolean": {
+      "match": "\\b(True|False)\\b",
+      "name": "constant.language.boolean.aski"
+    },
+
+    "builtin-function": {
+      "match": "\\b(Main|StdOut|StdErr)\\b",
+      "name": "support.function.builtin.aski"
+    },
+
+    "builtin-type": {
+      "match": "\\b(U8|U16|U32|U64|U128|I8|I16|I32|I64|I128|F32|F64|Bool|String|Self|Vec|Map|Option|Result|Iterator|Pair|Triple|Degree|Orb)\\b",
+      "name": "support.type.builtin.aski"
+    },
+
+    "pub": {
+      "match": "\\bPub(?=\\()",
+      "name": "keyword.other.pub.aski"
+    },
+
+    "constant": {
+      "patterns": [
+        {
+          "match": "(!)([A-Za-z][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "punctuation.definition.constant.aski" },
+            "2": { "name": "variable.other.constant.aski" }
+          }
+        }
+      ]
+    },
+
+    "self-ref": {
+      "match": "@Self\\b",
+      "name": "variable.language.self.aski"
+    },
+
+    "mutable-borrow-ref": {
+      "match": "(~)(@)([A-Z][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.operator.mutable.aski" },
+        "2": { "name": "keyword.operator.instance.aski" },
+        "3": { "name": "variable.other.instance.aski" }
+      }
+    },
+
+    "borrow-ref": {
+      "match": "(:)(@)(Self|[A-Z][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.operator.borrow.aski" },
+        "2": { "name": "keyword.operator.instance.aski" },
+        "3": { "name": "variable.other.instance.aski" }
+      }
+    },
+
+    "instance-ref": {
+      "match": "(@)([A-Z][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "keyword.operator.instance.aski" },
+        "2": { "name": "variable.other.instance.aski" }
+      }
+    },
+
+    "const-ref": {
+      "match": "(!)([A-Za-z][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "punctuation.definition.constant.aski" },
+        "2": { "name": "variable.other.constant.aski" }
+      }
+    },
+
+    "return-yield": {
+      "patterns": [
+        {
+          "match": "\\^",
+          "name": "keyword.control.return.aski"
+        },
+        {
+          "match": "#",
+          "name": "keyword.control.yield.aski"
+        }
+      ]
+    },
+
+    "match-delimiters": {
+      "patterns": [
+        {
+          "match": "\\(\\|",
+          "name": "keyword.control.match.begin.aski"
+        },
+        {
+          "match": "\\|\\)",
+          "name": "keyword.control.match.end.aski"
+        }
+      ]
+    },
+
+    "tail-delimiters": {
+      "patterns": [
+        {
+          "match": "\\[\\|",
+          "name": "keyword.control.tail.begin.aski"
+        },
+        {
+          "match": "\\|\\]",
+          "name": "keyword.control.tail.end.aski"
+        }
+      ]
+    },
+
+    "bound-delimiters": {
+      "patterns": [
+        {
+          "match": "\\{\\|",
+          "name": "keyword.control.bound.begin.aski"
+        },
+        {
+          "match": "\\|\\}",
+          "name": "keyword.control.bound.end.aski"
+        }
+      ]
+    },
+
+    "grammar-rule-ref": {
+      "match": "(<)([A-Z][a-zA-Z0-9_]*)(>)",
+      "captures": {
+        "1": { "name": "punctuation.definition.grammar-rule.begin.aski" },
+        "2": { "name": "entity.name.type.grammar-rule.aski" },
+        "3": { "name": "punctuation.definition.grammar-rule.end.aski" }
+      }
+    },
+
+    "ffi-block": {
+      "name": "meta.ffi.aski",
+      "begin": "\\{\\|(?!\\})",
+      "end": "\\|\\}",
+      "beginCaptures": { "0": { "name": "keyword.control.bound.begin.aski" } },
+      "endCaptures": { "0": { "name": "keyword.control.bound.end.aski" } },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#type-identifier" },
+        { "include": "#identifier" },
+        { "include": "#instance-ref" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "stub": {
+      "match": "___",
+      "name": "comment.block.stub.aski"
+    },
+
+    "wildcard": {
+      "match": "\\b_\\b",
+      "name": "variable.language.wildcard.aski"
+    },
+
+    "operator": {
+      "patterns": [
+        {
+          "match": "&&|\\|\\|",
+          "name": "keyword.operator.logical.aski"
+        },
+        {
+          "match": "==|!=|<=|>=",
+          "name": "keyword.operator.comparison.aski"
+        },
+        {
+          "match": "\\.\\.=?",
+          "name": "keyword.operator.range.aski"
+        },
+        {
+          "match": "\\?",
+          "name": "keyword.operator.propagation.aski"
+        },
+        {
+          "match": "[+\\-*/%]",
+          "name": "keyword.operator.arithmetic.aski"
+        },
+        {
+          "match": "<|>",
+          "name": "keyword.operator.comparison.aski"
+        }
+      ]
+    },
+
+    "label": {
+      "match": "(')([a-z][a-zA-Z0-9_]*)",
+      "captures": {
+        "1": { "name": "punctuation.definition.label.aski" },
+        "2": { "name": "entity.name.label.aski" }
+      }
+    },
+
+    "type-identifier": {
+      "match": "\\b[A-Z][a-zA-Z0-9_]*\\b",
+      "name": "entity.name.type.aski"
+    },
+
+    "identifier": {
+      "match": "\\b[a-z][a-zA-Z0-9_]*\\b",
+      "name": "entity.name.function.aski"
+    },
+
+    "punctuation": {
+      "patterns": [
+        {
+          "match": "[\\(\\)\\[\\]\\{\\}]",
+          "name": "punctuation.bracket.aski"
+        },
+        {
+          "match": "\\.",
+          "name": "punctuation.accessor.aski"
+        },
+        {
+          "match": "\\|",
+          "name": "punctuation.separator.aski"
+        },
+        {
+          "match": "[~:@&]",
+          "name": "keyword.operator.sigil.aski"
+        }
+      ]
+    }
+  }
+}

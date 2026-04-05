@@ -1,8 +1,8 @@
 {
   "name": "vscode-aski",
   "displayName": "Aski Language",
-  "description": "Tree-sitter syntax highlighting for the Aski language",
-  "version": "0.2.0",
+  "description": "Tree-sitter semantic highlighting + TextMate grammar for the Aski language",
+  "version": "0.3.0",
   "publisher": "criome",
   "license": "MIT",
   "engines": {
@@ -24,20 +24,68 @@
         "configuration": "./language-configuration.json"
       }
     ],
+    "grammars": [
+      {
+        "language": "aski",
+        "scopeName": "source.aski",
+        "path": "./syntaxes/aski.tmLanguage.json"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "aski",
+        "scopes": {
+          "comment":    ["comment.line.aski"],
+          "keyword":    ["keyword.control.aski"],
+          "string":     ["string.quoted.double.aski"],
+          "number":     ["constant.numeric.aski"],
+          "operator":   ["keyword.operator.aski"],
+          "type":       ["entity.name.type.aski"],
+          "class":      ["entity.name.type.class.aski"],
+          "interface":  ["entity.name.type.interface.aski"],
+          "enumMember": ["variable.other.enummember.aski"],
+          "function":   ["entity.name.function.aski"],
+          "method":     ["entity.name.function.method.aski"],
+          "parameter":  ["variable.parameter.aski"],
+          "variable":   ["variable.other.aski"],
+          "property":   ["variable.other.property.aski"],
+          "namespace":  ["entity.name.namespace.aski"],
+          "macro":      ["support.function.builtin.aski"],
+          "decorator":  ["keyword.operator.sigil.aski"],
+          "label":      ["entity.name.label.aski"],
+          "regexp":     ["punctuation.bracket.aski"]
+        }
+      }
+    ],
     "configurationDefaults": {
       "editor.semanticTokenColorCustomizations": {
         "rules": {
-          "comment:aski":   "#505050",
-          "keyword:aski":   "#bb44ee",
-          "string:aski":    "#00cc44",
-          "number:aski":    "#ff8800",
-          "operator:aski":  "#ff5577",
-          "type:aski":      "#f5c000",
-          "function:aski":  "#e040a0",
-          "variable:aski":  "#d0d0d0",
-          "parameter:aski": "#ff0066",
-          "macro:aski":     "#cc44ff",
-          "regexp:aski":    "#b0b0b0"
+          "comment:aski":                         "#505050",
+          "keyword:aski":                         "#bb44ee",
+          "string:aski":                          "#00cc44",
+          "string.readonly:aski":                 "#00aa88",
+          "number:aski":                          "#ff8800",
+          "operator:aski":                        "#ff5577",
+          "type:aski":                            "#f5c000",
+          "type.defaultLibrary:aski":             "#e0a000",
+          "class:aski":                           "#f5c000",
+          "class.declaration:aski":               "#f5d040",
+          "interface:aski":                       "#e080c0",
+          "enumMember:aski":                      "#ff8800",
+          "function:aski":                        "#60a0f0",
+          "function.declaration:aski":            "#70b0ff",
+          "method:aski":                          "#60a0f0",
+          "parameter:aski":                       "#ff0066",
+          "parameter.declaration:aski":           "#ff2288",
+          "variable:aski":                        "#d0d0d0",
+          "variable.defaultLibrary:aski":         "#cc44ff",
+          "property:aski":                        "#ff0066",
+          "namespace:aski":                       "#f5c000",
+          "macro:aski":                           "#cc44ff",
+          "macro.defaultLibrary:aski":            "#cc44ff",
+          "decorator:aski":                       "#bb44ee",
+          "label:aski":                           "#f5c000",
+          "regexp:aski":                          "#707070"
         }
       }
     }
