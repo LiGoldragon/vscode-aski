@@ -151,11 +151,10 @@
 
 
 ;; =============================================================
-;; Module imports
+;; Module exports and imports
 ;; =============================================================
 
 (module_import (type_identifier) @module)
-(module_decl (type_identifier) @type)
 
 
 ;; =============================================================
@@ -178,22 +177,22 @@
 
 
 ;; =============================================================
-;; Type expressions
+;; Generic fallbacks (MUST be last — first-match-wins)
 ;; =============================================================
 
 (type_identifier) @type
 (generic_param) @type.parameter
-(type_application
-  constructor: (type_identifier) @type)
 
 
 ;; =============================================================
 ;; Instances / variables
 ;; =============================================================
 
-(instance_ref) @variable
+;; Specific definitions first (first-match-wins)
 (instance_stmt (instance_ref) @variable.definition)
 (mutation_stmt (mutable_ref) @variable.definition)
+;; Generic fallback
+(instance_ref) @variable
 
 
 ;; =============================================================

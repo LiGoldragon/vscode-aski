@@ -194,13 +194,22 @@ class AskiTokensProvider implements vscode.DocumentSemanticTokensProvider {
     const matches = this.query.matches(tree.rootNode);
     const builder = new vscode.SemanticTokensBuilder(legend);
 
+    // First-match-wins: track which positions already have a token
+    // so specific captures (earlier in highlights.scm) are not
+    // overwritten by generic fallbacks (later in highlights.scm).
+    const seen = new Set<string>();
+
     for (const match of matches) {
       for (const capture of match.captures) {
         const resolved = resolveCapture(capture.name);
         if (resolved === null) continue;
 
-        const [typeIdx, modBits] = resolved;
         const node = capture.node;
+        const key = `${node.startPosition.row}:${node.startPosition.column}:${node.endPosition.row}:${node.endPosition.column}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        const [typeIdx, modBits] = resolved;
         const startLine = node.startPosition.row;
         const startChar = node.startPosition.column;
         const endLine = node.endPosition.row;
