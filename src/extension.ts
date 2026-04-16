@@ -6,7 +6,7 @@ import * as fs from 'fs';
 // Standard VSCode semantic token types — themes style these automatically
 const TOKEN_TYPES = [
   'comment',       // 0  comments, stubs
-  'keyword',       // 1  control flow: ^return, #yield, (||), Pub
+  'keyword',       // 1  control flow: ^return, ?try, (||) match, {||} iter
   'string',        // 2  string literals
   'number',        // 3  numeric literals
   'operator',      // 4  binary ops, comparison, logical, range
@@ -21,7 +21,7 @@ const TOKEN_TYPES = [
   'property',      // 13 struct fields, field access (PascalCase after .)
   'namespace',     // 14 modules
   'macro',         // 15 builtins: Main, StdOut, StdErr
-  'decorator',     // 16 sigils: @ : ~ ! and grammar < >
+  'decorator',     // 16 sigils: @ : ~ $ & ^
   'label',         // 17 labels: 'name
   'regexp',        // 18 brackets, delimiters, punctuation
 ];
@@ -53,7 +53,6 @@ const CAPTURE_MAP: Record<string, [number, number]> = {
   'keyword':              [1, 0],
   'keyword.control':      [1, 0],
   'keyword.return':       [1, 0],
-  'keyword.yield':        [1, 0],
 
   // Strings
   'string':               [2, 0],
@@ -84,6 +83,10 @@ const CAPTURE_MAP: Record<string, [number, number]> = {
 
   // Module
   'module':               [14, 0],
+  'module.definition':    [14, MOD_DECLARATION | MOD_DEFINITION],
+
+  // Type parameter ($Value, $Clone&Debug)
+  'type.parameter':       [5, MOD_DECLARATION],
 
   // Functions / methods
   'function':             [9, MOD_DECLARATION],
@@ -93,6 +96,7 @@ const CAPTURE_MAP: Record<string, [number, number]> = {
 
   // Variables
   'variable':             [12, 0],
+  'variable.definition':  [12, MOD_DECLARATION | MOD_DEFINITION],
   'variable.parameter':   [11, MOD_DECLARATION],
   'variable.builtin':     [12, MOD_DEFAULT_LIB],
 
