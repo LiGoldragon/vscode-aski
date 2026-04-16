@@ -154,6 +154,11 @@
 ;; Module exports and imports
 ;; =============================================================
 
+;; Exports — PascalCase types, camelCase traits
+(module_export (type_identifier) @type)
+(module_export (identifier) @type.interface)
+
+;; Imports
 (module_import (type_identifier) @module)
 
 
